@@ -1,7 +1,9 @@
 package daisy.community_be.domain.user;
 import static daisy.community_be.domain.user.QUser.user;
 import com.querydsl.jpa.impl.JPAQueryFactory;
+import org.springframework.stereotype.Repository;
 
+@Repository
 public class UserQueryRepository {
     private final JPAQueryFactory queryFactory;
 
