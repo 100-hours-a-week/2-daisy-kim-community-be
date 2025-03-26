@@ -1,16 +1,14 @@
 package daisy.community_be.dto;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
 @AllArgsConstructor
+@NoArgsConstructor
 public class UserResponseDto {
     private String message;
-    private Data data;
+    private Long userId;
 
-    @Getter
-    @AllArgsConstructor
-    public static class Data {
-        private Long userId;
-    }
+
 }

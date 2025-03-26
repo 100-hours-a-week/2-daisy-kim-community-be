@@ -30,6 +30,6 @@ public class UserService {
 
         User saved = userRepository.save(user);
 
-        return new UserResponseDto("register_success", new UserResponseDto.Data(saved.getId()));
+        return new UserResponseDto("register_success", saved.getId());
     }
 }
