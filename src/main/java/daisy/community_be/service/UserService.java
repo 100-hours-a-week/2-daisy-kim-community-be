@@ -1,8 +1,8 @@
 package daisy.community_be.service;
 
 import daisy.community_be.domain.User;
-import daisy.community_be.dto.UserRequestDto;
-import daisy.community_be.dto.UserResponseDto;
+import daisy.community_be.dto.request.UserRequestDto;
+import daisy.community_be.dto.response.UserResponseDto;
 import daisy.community_be.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

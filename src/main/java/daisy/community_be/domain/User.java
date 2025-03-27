@@ -25,6 +25,18 @@ public class User {
 
     private String profileImageUrl;
 
+    public void setNickname(String nickname) {
+        this.nickname = nickname;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public void setProfileImageUrl(String profileImageUrl) {
+        this.profileImageUrl = profileImageUrl;
+    }
+
     @Builder
     public User(String email, String password, String nickname, String profileImageUrl) {
         this.email = email;

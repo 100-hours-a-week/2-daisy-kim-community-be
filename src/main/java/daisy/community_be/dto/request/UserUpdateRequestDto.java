@@ -1,15 +1,15 @@
-package daisy.community_be.dto;
+package daisy.community_be.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
-public class UserRequestDto {
-    @NotBlank
-    private String email;
-    @NotBlank
-    private String password;
+@NoArgsConstructor
+public class UserUpdateRequestDto {
     @NotBlank
     private String nickname;
+    @NotBlank
+    private String password;
     private String profileImageUrl;
 }
