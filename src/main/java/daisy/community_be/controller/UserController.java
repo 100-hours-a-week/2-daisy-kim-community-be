@@ -29,7 +29,7 @@ public class UserController {
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/users/{userId}")
+    @PatchMapping("/{userId}")
     public ResponseEntity<Map<String, Object>> updateUser(
             @PathVariable Long userId,
             @RequestBody UserUpdateRequestDto requestDto) {
