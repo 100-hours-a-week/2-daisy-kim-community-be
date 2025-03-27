@@ -52,4 +52,19 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
         }
     }
+
+    @DeleteMapping("/sessions")
+    public ResponseEntity<Map<String, Object>> logout() {
+        try {
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "logout_success");
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            // 예외 발생 시 500 응답
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "internal_server_error");
+            response.put("data", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+    }
 }
