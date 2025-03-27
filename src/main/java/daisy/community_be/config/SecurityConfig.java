@@ -21,16 +21,14 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.disable())
-                .csrf(csrf -> csrf.disable())
+                .cors(cors -> cors.disable())    // CORS 비활성화
+                .csrf(csrf -> csrf.disable())    // CSRF 비활성화
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/users/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/users", "/users/").permitAll()
-                        .anyRequest().authenticated()
+                        // 모든 요청을 인증 없이 허용
+                        .anyRequest().permitAll()
                 )
-                .formLogin(form -> form.disable())
-                .httpBasic(httpBasic -> httpBasic.disable());
+                .formLogin(form -> form.disable())       // Form Login 비활성화
+                .httpBasic(httpBasic -> httpBasic.disable()); // HTTP Basic 비활성화
 
         return http.build();
     }
