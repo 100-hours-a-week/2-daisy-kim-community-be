@@ -2,8 +2,10 @@ package daisy.community_be.controller;
 
 import daisy.community_be.dto.request.PostCreateRequestDto;
 import daisy.community_be.dto.request.PostListResponseDto;
+import daisy.community_be.dto.request.PostUpdateRequestDto;
 import daisy.community_be.dto.response.PostCreateResponseDto;
 import daisy.community_be.dto.response.PostDetailResponseDto;
+import daisy.community_be.dto.response.PostUpdateResponseDto;
 import daisy.community_be.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -76,6 +78,34 @@ public class PostController {
             }
             return ResponseEntity.badRequest()
                     .body(Map.of("message", "invalid_request", "data", null));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "internal_server_error", "data", null));
+        }
+    }
+
+    @PatchMapping("/{postId}")
+    public ResponseEntity<?> updatePost(@PathVariable Long postId,
+                                        @RequestBody PostUpdateRequestDto requestDto) {
+        try {
+            Long userId = 1L;
+            PostUpdateResponseDto response = postService.updatePost(postId, requestDto, userId);
+
+            return ResponseEntity.ok(Map.of(
+                    "message", "post_updated",
+                    "data", response
+            ));
+        } catch (IllegalArgumentException e) {
+            if ("post_not_found".equals(e.getMessage())) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("message", "post_not_found", "data", null));
+            }
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "invalid_request", "data", null));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", "forbidden", "data", null));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

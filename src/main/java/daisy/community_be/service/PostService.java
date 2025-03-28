@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 import daisy.community_be.dto.request.PostCreateRequestDto;
 import daisy.community_be.dto.response.PostCreateResponseDto;
 import java.time.LocalDateTime;
+import daisy.community_be.dto.request.PostUpdateRequestDto;
+import daisy.community_be.dto.response.PostUpdateResponseDto;
 
 @Service
 @RequiredArgsConstructor
@@ -77,6 +79,30 @@ public class PostService {
                 savedPost.getId(),
                 savedPost.getTitle(),
                 savedPost.getCreatedAt()
+        );
+    }
+
+    public PostUpdateResponseDto updatePost(Long postId, PostUpdateRequestDto requestDto, Long userId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("post_not_found"));
+
+        if (!post.getUser().getId().equals(userId)) {
+            throw new SecurityException("forbidden");
+        }
+
+        if (requestDto.getTitle() != null) post.setTitle(requestDto.getTitle());
+        if (requestDto.getContent() != null) post.setContent(requestDto.getContent());
+        if (requestDto.getPostImage() != null) post.setImageUrl(requestDto.getPostImage());
+        post.setUpdatedAt(LocalDateTime.now());
+
+        postRepository.save(post);
+
+        return new PostUpdateResponseDto(
+                post.getId(),
+                post.getTitle(),
+                post.getContent(),
+                post.getUser().getProfileImageUrl(),
+                post.getUpdatedAt()
         );
     }
 }
