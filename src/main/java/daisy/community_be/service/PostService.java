@@ -105,4 +105,15 @@ public class PostService {
                 post.getUpdatedAt()
         );
     }
+
+    public void deletePost(Long postId, Long userId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("post_not_found"));
+
+        if (!post.getUser().getId().equals(userId)) {
+            throw new SecurityException("forbidden");
+        }
+
+        postRepository.delete(post);
+    }
 }

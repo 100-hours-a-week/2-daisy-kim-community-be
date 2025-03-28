@@ -112,4 +112,30 @@ public class PostController {
                     .body(Map.of("message", "internal_server_error", "data", null));
         }
     }
+
+    @DeleteMapping("/{postId}")
+    public ResponseEntity<?> deletePost(@PathVariable Long postId) {
+        try {
+            Long userId = 1L;
+
+            postService.deletePost(postId, userId);
+
+            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                    .body(Map.of("message", "post_deleted"));
+        } catch (IllegalArgumentException e) {
+            if ("post_not_found".equals(e.getMessage())) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("message", "post_not_found", "data", null));
+            }
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "invalid_request", "data", null));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", "forbidden", "data", null));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "internal_server_error", "data", null));
+        }
+    }
 }
