@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 public class PostDetailResponseDto {
     private Long postId;
     private String title;
+    private String content;
     private AuthorDto author;
     private int likeCount;
     private int commentCount;

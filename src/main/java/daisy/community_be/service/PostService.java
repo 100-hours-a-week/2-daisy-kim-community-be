@@ -47,6 +47,7 @@ public class PostService {
         return new PostDetailResponseDto(
                 post.getId(),
                 post.getTitle(),
+                post.getContent(),
                 new PostDetailResponseDto.AuthorDto(
                         post.getUser().getNickname(),
                         post.getUser().getProfileImageUrl()
