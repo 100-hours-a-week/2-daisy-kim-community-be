@@ -113,4 +113,35 @@ public class CommentController {
                     .body(Map.of("message", "internal_server_error", "data", null));
         }
     }
+
+    @DeleteMapping("/{postId}/comments/{commentId}")
+    public ResponseEntity<?> deleteComment(@PathVariable Long postId,
+                                           @PathVariable Long commentId) {
+        try {
+            Long userId = 1L;
+
+            commentService.deleteComment(postId, commentId, userId);
+
+            return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                    .body(Map.of("message", "comment_deleted"));
+        } catch (IllegalArgumentException e) {
+            String msg = e.getMessage();
+            if ("comment_not_found".equals(msg)) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("message", "comment_not_found", "data", null));
+            } else if ("invalid_request".equals(msg)) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "invalid_request", "data", null));
+            }
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "invalid_request", "data", null));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", "forbidden", "data", null));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "internal_server_error", "data", null));
+        }
+    }
 }

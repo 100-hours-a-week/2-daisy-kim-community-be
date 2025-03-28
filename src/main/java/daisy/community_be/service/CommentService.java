@@ -96,4 +96,19 @@ public class CommentService {
                 comment.getUpdatedAt()
         );
     }
+
+    public void deleteComment(Long postId, Long commentId, Long userId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("comment_not_found"));
+
+        if (!comment.getPost().getId().equals(postId)) {
+            throw new IllegalArgumentException("invalid_request");
+        }
+
+        if (!comment.getUser().getId().equals(userId)) {
+            throw new SecurityException("forbidden");
+        }
+
+        commentRepository.delete(comment);
+    }
 }
