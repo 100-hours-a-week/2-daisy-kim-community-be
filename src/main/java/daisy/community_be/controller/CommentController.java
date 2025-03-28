@@ -2,11 +2,14 @@ package daisy.community_be.controller;
 
 import daisy.community_be.dto.request.CommentCreateRequestDto;
 import daisy.community_be.dto.response.CommentCreateResponseDto;
+import daisy.community_be.dto.response.CommentListResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import daisy.community_be.service.CommentService;
+
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -38,6 +41,28 @@ public class CommentController {
             } else if ("unauthorized".equals(message)) {
                 return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                         .body(Map.of("message", "unauthorized", "data", null));
+            }
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "invalid_request", "data", null));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "internal_server_error", "data", null));
+        }
+    }
+
+    @GetMapping("/{postId}/comments")
+    public ResponseEntity<?> getComments(@PathVariable Long postId) {
+        try {
+            List<CommentListResponseDto> comments = commentService.getCommentsByPostId(postId);
+            return ResponseEntity.ok(Map.of(
+                    "message", "comments_fetched",
+                    "data", comments
+            ));
+        } catch (IllegalArgumentException e) {
+            if ("post_not_found".equals(e.getMessage())) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("message", "post_not_found", "data", null));
             }
             return ResponseEntity.badRequest()
                     .body(Map.of("message", "invalid_request", "data", null));

@@ -5,6 +5,7 @@ import daisy.community_be.domain.Post;
 import daisy.community_be.domain.User;
 import daisy.community_be.dto.request.CommentCreateRequestDto;
 import daisy.community_be.dto.response.CommentCreateResponseDto;
+import daisy.community_be.dto.response.CommentListResponseDto;
 import daisy.community_be.repository.CommentRepository;
 import daisy.community_be.repository.PostRepository;
 import daisy.community_be.repository.UserRepository;
@@ -12,6 +13,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -45,5 +48,23 @@ public class CommentService {
                 ),
                 saved.getCreatedAt()
         );
+    }
+
+    public List<CommentListResponseDto> getCommentsByPostId(Long postId) {
+        Post post = postRepository.findById(postId)
+                .orElseThrow(() -> new IllegalArgumentException("post_not_found"));
+
+        List<Comment> comments = commentRepository.findByPostIdOrderByCreatedAtAsc(postId);
+
+        return comments.stream()
+                .map(comment -> new CommentListResponseDto(
+                        comment.getId(),
+                        comment.getContent(),
+                        new CommentListResponseDto.AuthorDto(
+                                comment.getUser().getNickname(),
+                                comment.getUser().getProfileImageUrl()
+                        ),
+                        comment.getCreatedAt()
+                )).collect(Collectors.toList());
     }
 }
