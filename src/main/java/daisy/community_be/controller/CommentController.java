@@ -1,8 +1,10 @@
 package daisy.community_be.controller;
 
 import daisy.community_be.dto.request.CommentCreateRequestDto;
+import daisy.community_be.dto.request.CommentUpdateRequestDto;
 import daisy.community_be.dto.response.CommentCreateResponseDto;
 import daisy.community_be.dto.response.CommentListResponseDto;
+import daisy.community_be.dto.response.CommentUpdateResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -66,6 +68,45 @@ public class CommentController {
             }
             return ResponseEntity.badRequest()
                     .body(Map.of("message", "invalid_request", "data", null));
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("message", "internal_server_error", "data", null));
+        }
+    }
+
+    @PatchMapping("/{postId}/comments/{commentId}")
+    public ResponseEntity<?> updateComment(@PathVariable Long postId,
+                                           @PathVariable Long commentId,
+                                           @RequestBody CommentUpdateRequestDto requestDto) {
+        try {
+            if (requestDto.getContent() == null || requestDto.getContent().isBlank()) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "invalid_request", "data", null));
+            }
+
+            Long userId = 1L;
+
+            CommentUpdateResponseDto response = commentService.updateComment(postId, commentId, requestDto, userId);
+
+            return ResponseEntity.ok(Map.of(
+                    "message", "comment_updated",
+                    "data", response
+            ));
+        } catch (IllegalArgumentException e) {
+            String msg = e.getMessage();
+            if ("comment_not_found".equals(msg)) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("message", "comment_not_found", "data", null));
+            } else if ("invalid_request".equals(msg)) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("message", "invalid_request", "data", null));
+            }
+            return ResponseEntity.badRequest()
+                    .body(Map.of("message", "invalid_request", "data", null));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("message", "forbidden", "data", null));
         } catch (Exception e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)

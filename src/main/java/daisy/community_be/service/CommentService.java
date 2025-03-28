@@ -4,8 +4,10 @@ import daisy.community_be.domain.Comment;
 import daisy.community_be.domain.Post;
 import daisy.community_be.domain.User;
 import daisy.community_be.dto.request.CommentCreateRequestDto;
+import daisy.community_be.dto.request.CommentUpdateRequestDto;
 import daisy.community_be.dto.response.CommentCreateResponseDto;
 import daisy.community_be.dto.response.CommentListResponseDto;
+import daisy.community_be.dto.response.CommentUpdateResponseDto;
 import daisy.community_be.repository.CommentRepository;
 import daisy.community_be.repository.PostRepository;
 import daisy.community_be.repository.UserRepository;
@@ -66,5 +68,32 @@ public class CommentService {
                         ),
                         comment.getCreatedAt()
                 )).collect(Collectors.toList());
+    }
+
+    public CommentUpdateResponseDto updateComment(Long postId, Long commentId, CommentUpdateRequestDto requestDto, Long userId) {
+        Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new IllegalArgumentException("comment_not_found"));
+
+        // 댓글이 해당 게시글에 속해 있는지 확인
+        if (!comment.getPost().getId().equals(postId)) {
+            throw new IllegalArgumentException("invalid_request");
+        }
+
+        if (!comment.getUser().getId().equals(userId)) {
+            throw new SecurityException("forbidden");
+        }
+
+        if (requestDto.getContent() != null) {
+            comment.setContent(requestDto.getContent());
+        }
+
+        comment.setUpdatedAt(LocalDateTime.now());
+        commentRepository.save(comment);
+
+        return new CommentUpdateResponseDto(
+                comment.getId(),
+                comment.getContent(),
+                comment.getUpdatedAt()
+        );
     }
 }
