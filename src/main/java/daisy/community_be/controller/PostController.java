@@ -20,7 +20,6 @@ import java.util.Map;
 @RequestMapping("/posts")
 public class PostController {
     private final PostService postService;
-
     // 게시글 전체 목록 조회
     @GetMapping
     public ResponseEntity<?> getPosts() {
@@ -66,9 +65,7 @@ public class PostController {
                         .body(Map.of("message", "invalid_request", "data", null));
             }
 
-            Long userId = 1L; // 🔐 나중에 로그인 유저에서 가져오기 (지금은 하드코딩)
-            PostCreateResponseDto response = postService.createPost(requestDto, userId);
-
+            PostCreateResponseDto response = postService.createPost(requestDto, requestDto.getUserId());
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body(Map.of("message", "post_created", "data", response));
         } catch (IllegalArgumentException e) {
