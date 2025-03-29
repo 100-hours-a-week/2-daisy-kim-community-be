@@ -29,7 +29,7 @@ public class CommentController {
                         .body(Map.of("message", "invalid_request", "data", null));
             }
 
-            Long userId = 1L; // 인증 연동 전 임시 사용자 ID
+            Long userId = requestDto.getUserId();
 
             CommentCreateResponseDto response = commentService.createComment(postId, requestDto, userId);
 
@@ -85,7 +85,7 @@ public class CommentController {
                         .body(Map.of("message", "invalid_request", "data", null));
             }
 
-            Long userId = 1L;
+            Long userId = requestDto.getUserId();
 
             CommentUpdateResponseDto response = commentService.updateComment(postId, commentId, requestDto, userId);
 
