@@ -11,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import daisy.community_be.service.CommentService;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -79,46 +80,57 @@ public class CommentController {
     public ResponseEntity<?> updateComment(@PathVariable Long postId,
                                            @PathVariable Long commentId,
                                            @RequestBody CommentUpdateRequestDto requestDto) {
+
+        if (requestDto.getContent() == null || requestDto.getContent().isBlank()) {
+            Map<String, Object> errorBody = new HashMap<>();
+            errorBody.put("message", "invalid_request");
+            errorBody.put("data", null);
+            return ResponseEntity.badRequest().body(errorBody);
+        }
+
         try {
-            if (requestDto.getContent() == null || requestDto.getContent().isBlank()) {
-                return ResponseEntity.badRequest()
-                        .body(Map.of("message", "invalid_request", "data", null));
-            }
-
             Long userId = requestDto.getUserId();
-
             CommentUpdateResponseDto response = commentService.updateComment(postId, commentId, requestDto, userId);
 
-            return ResponseEntity.ok(Map.of(
-                    "message", "comment_updated",
-                    "data", response
-            ));
+            if (response == null) {
+                Map<String, Object> errorBody = new HashMap<>();
+                errorBody.put("message", "null_response_from_service");
+                errorBody.put("data", null);
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorBody);
+            }
+
+            Map<String, Object> body = new HashMap<>();
+            body.put("message", "comment_updated");
+            body.put("data", response);
+            return ResponseEntity.ok(body);
+
         } catch (IllegalArgumentException e) {
             String msg = e.getMessage();
-            if ("comment_not_found".equals(msg)) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Map.of("message", "comment_not_found", "data", null));
-            } else if ("invalid_request".equals(msg)) {
-                return ResponseEntity.badRequest()
-                        .body(Map.of("message", "invalid_request", "data", null));
-            }
-            return ResponseEntity.badRequest()
-                    .body(Map.of("message", "invalid_request", "data", null));
+            HttpStatus status = "comment_not_found".equals(msg) ? HttpStatus.NOT_FOUND : HttpStatus.BAD_REQUEST;
+
+            Map<String, Object> errorBody = new HashMap<>();
+            errorBody.put("message", msg);
+            errorBody.put("data", null);
+            return ResponseEntity.status(status).body(errorBody);
         } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("message", "forbidden", "data", null));
+            Map<String, Object> errorBody = new HashMap<>();
+            errorBody.put("message", "forbidden");
+            errorBody.put("data", null);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errorBody);
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("message", "internal_server_error", "data", null));
+            Map<String, Object> errorBody = new HashMap<>();
+            errorBody.put("message", "internal_server_error");
+            errorBody.put("data", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorBody);
         }
     }
 
     @DeleteMapping("/{postId}/comments/{commentId}")
     public ResponseEntity<?> deleteComment(@PathVariable Long postId,
-                                           @PathVariable Long commentId) {
+                                           @PathVariable Long commentId, @RequestBody CommentUpdateRequestDto requestDto) {
         try {
-            Long userId = 1L;
+            Long userId = requestDto.getUserId();
 
             commentService.deleteComment(postId, commentId, userId);
 

@@ -11,6 +11,7 @@ import daisy.community_be.dto.response.CommentUpdateResponseDto;
 import daisy.community_be.repository.CommentRepository;
 import daisy.community_be.repository.PostRepository;
 import daisy.community_be.repository.UserRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -70,6 +71,7 @@ public class CommentService {
                 )).collect(Collectors.toList());
     }
 
+    @Transactional
     public CommentUpdateResponseDto updateComment(Long postId, Long commentId, CommentUpdateRequestDto requestDto, Long userId) {
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("comment_not_found"));
