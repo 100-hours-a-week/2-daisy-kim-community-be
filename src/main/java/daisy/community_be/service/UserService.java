@@ -32,4 +32,9 @@ public class UserService {
 
         return new UserResponseDto("register_success", saved.getId());
     }
+
+    public User getUserById(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("user_not_found"));
+    }
 }
