@@ -2,7 +2,7 @@ package daisy.community_be.service;
 
 import daisy.community_be.domain.Post;
 import daisy.community_be.domain.User;
-import daisy.community_be.dto.request.PostListResponseDto;
+import daisy.community_be.dto.response.PostListResponseDto;
 import daisy.community_be.dto.response.PostDetailResponseDto;
 import daisy.community_be.repository.PostRepository;
 import daisy.community_be.repository.UserRepository;
@@ -49,6 +49,7 @@ public class PostService {
                 post.getTitle(),
                 post.getContent(),
                 new PostDetailResponseDto.AuthorDto(
+                        post.getUser().getId(),
                         post.getUser().getNickname(),
                         post.getUser().getProfileImageUrl()
                 ),
@@ -93,7 +94,9 @@ public class PostService {
 
         if (requestDto.getTitle() != null) post.setTitle(requestDto.getTitle());
         if (requestDto.getContent() != null) post.setContent(requestDto.getContent());
-        if (requestDto.getPostImage() != null) post.setImageUrl(requestDto.getPostImage());
+        if (requestDto.getPostImage() != null && !requestDto.getPostImage().isBlank()) {
+            post.setImageUrl(requestDto.getPostImage());
+        }
         post.setUpdatedAt(LocalDateTime.now());
 
         postRepository.save(post);

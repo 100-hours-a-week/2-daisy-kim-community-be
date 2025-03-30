@@ -20,6 +20,7 @@ public class PostDetailResponseDto {
     @Getter
     @AllArgsConstructor
     public static class AuthorDto {
+        private Long userId;
         private String nickname;
         private String profileImage;
     }

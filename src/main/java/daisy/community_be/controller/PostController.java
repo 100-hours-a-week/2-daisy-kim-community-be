@@ -1,10 +1,10 @@
 package daisy.community_be.controller;
 
 import daisy.community_be.dto.request.PostCreateRequestDto;
-import daisy.community_be.dto.request.PostListResponseDto;
 import daisy.community_be.dto.request.PostUpdateRequestDto;
 import daisy.community_be.dto.response.PostCreateResponseDto;
 import daisy.community_be.dto.response.PostDetailResponseDto;
+import daisy.community_be.dto.response.PostListResponseDto;
 import daisy.community_be.dto.response.PostUpdateResponseDto;
 import daisy.community_be.service.PostService;
 import lombok.RequiredArgsConstructor;
@@ -12,48 +12,57 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/posts")
 public class PostController {
     private final PostService postService;
-    // 게시글 전체 목록 조회
+
     @GetMapping
     public ResponseEntity<?> getPosts() {
         try {
             List<PostListResponseDto> posts = postService.getAllPosts();
-            return ResponseEntity.ok(Map.of(
-                    "message", "posts_fetched",
-                    "data", posts
-            ));
+
+            Map<String, Object> body = new HashMap<>();
+            body.put("message", "posts_fetched");
+            body.put("data", posts);
+
+            return ResponseEntity.ok(body);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("message", "internal_server_error", "data", null));
+            Map<String, Object> body = new HashMap<>();
+            body.put("message", "internal_server_error");
+            body.put("data", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
         }
     }
 
-    // 게시글 상세 조회
     @GetMapping("/{postId}")
     public ResponseEntity<?> getPostById(@PathVariable Long postId) {
         try {
             PostDetailResponseDto post = postService.getPostById(postId);
-            return ResponseEntity.ok(Map.of(
-                    "message", "posts_fetched",
-                    "data", List.of(post)
-            ));
+
+            Map<String, Object> body = new HashMap<>();
+            body.put("message", "posts_fetched");
+            body.put("data", List.of(post));
+
+            return ResponseEntity.ok(body);
         } catch (IllegalArgumentException e) {
+            Map<String, Object> body = new HashMap<>();
             if ("post_not_found".equals(e.getMessage())) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Map.of("message", "post_not_found", "data", null));
+                body.put("message", "post_not_found");
+                body.put("data", null);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
             }
-            return ResponseEntity.badRequest()
-                    .body(Map.of("message", "invalid_request", "data", null));
+            body.put("message", "invalid_request");
+            body.put("data", null);
+            return ResponseEntity.badRequest().body(body);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("message", "internal_server_error", "data", null));
+            Map<String, Object> body = new HashMap<>();
+            body.put("message", "internal_server_error");
+            body.put("data", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
         }
     }
 
@@ -61,78 +70,107 @@ public class PostController {
     public ResponseEntity<?> createPost(@RequestBody PostCreateRequestDto requestDto) {
         try {
             if (requestDto.getTitle() == null || requestDto.getContent() == null) {
-                return ResponseEntity.badRequest()
-                        .body(Map.of("message", "invalid_request", "data", null));
+                Map<String, Object> body = new HashMap<>();
+                body.put("message", "invalid_request");
+                body.put("data", null);
+                return ResponseEntity.badRequest().body(body);
             }
 
             PostCreateResponseDto response = postService.createPost(requestDto, requestDto.getUserId());
-            return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(Map.of("message", "post_created", "data", response));
+
+            Map<String, Object> body = new HashMap<>();
+            body.put("message", "post_created");
+            body.put("data", response);
+
+            return ResponseEntity.status(HttpStatus.CREATED).body(body);
         } catch (IllegalArgumentException e) {
-            if (e.getMessage().equals("unauthorized")) {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                        .body(Map.of("message", "unauthorized", "data", null));
+            Map<String, Object> body = new HashMap<>();
+            if ("unauthorized".equals(e.getMessage())) {
+                body.put("message", "unauthorized");
+                body.put("data", null);
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(body);
             }
-            return ResponseEntity.badRequest()
-                    .body(Map.of("message", "invalid_request", "data", null));
+            body.put("message", "invalid_request");
+            body.put("data", null);
+            return ResponseEntity.badRequest().body(body);
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("message", "internal_server_error", "data", null));
+            Map<String, Object> body = new HashMap<>();
+            body.put("message", "internal_server_error");
+            body.put("data", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
         }
     }
 
     @PatchMapping("/{postId}")
     public ResponseEntity<?> updatePost(@PathVariable Long postId,
-                                        @RequestBody PostUpdateRequestDto requestDto) {
+                                        @RequestBody PostUpdateRequestDto requestDto, @RequestHeader("userId") Long userId) {
         try {
-            Long userId = 1L;
             PostUpdateResponseDto response = postService.updatePost(postId, requestDto, userId);
 
-            return ResponseEntity.ok(Map.of(
-                    "message", "post_updated",
-                    "data", response
-            ));
+            Map<String, Object> body = new HashMap<>();
+            body.put("message", "post_updated");
+            body.put("data", response);
+
+            return ResponseEntity.ok(body);
         } catch (IllegalArgumentException e) {
+            Map<String, Object> body = new HashMap<>();
             if ("post_not_found".equals(e.getMessage())) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Map.of("message", "post_not_found", "data", null));
+                body.put("message", "post_not_found");
+                body.put("data", null);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
             }
-            return ResponseEntity.badRequest()
-                    .body(Map.of("message", "invalid_request", "data", null));
+            body.put("message", "invalid_request");
+            body.put("data", null);
+            return ResponseEntity.badRequest().body(body);
         } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("message", "forbidden", "data", null));
+            Map<String, Object> body = new HashMap<>();
+            body.put("message", "forbidden");
+            body.put("data", null);
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("message", "internal_server_error", "data", null));
+            Map<String, Object> body = new HashMap<>();
+            body.put("message", "internal_server_error");
+            body.put("data", null);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
         }
     }
 
     @DeleteMapping("/{postId}")
-    public ResponseEntity<?> deletePost(@PathVariable Long postId) {
+    public ResponseEntity<?> deletePost(@PathVariable Long postId,
+                                        @RequestHeader("userId") Long userId) {
         try {
-            Long userId = 1L;
+            if (userId == null) {
+                Map<String, Object> body = new HashMap<>();
+                body.put("message", "invalid_request");
+                body.put("data", "");
+                return ResponseEntity.badRequest().body(body);
+            }
 
             postService.deletePost(postId, userId);
-
-            return ResponseEntity.status(HttpStatus.NO_CONTENT)
-                    .body(Map.of("message", "post_deleted"));
+            return ResponseEntity.noContent().build();
         } catch (IllegalArgumentException e) {
+            Map<String, Object> body = new HashMap<>();
             if ("post_not_found".equals(e.getMessage())) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                        .body(Map.of("message", "post_not_found", "data", null));
+                body.put("message", "post_not_found");
+                body.put("data", "");
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(body);
             }
-            return ResponseEntity.badRequest()
-                    .body(Map.of("message", "invalid_request", "data", null));
+            body.put("message", "invalid_request");
+            body.put("data", "");
+            return ResponseEntity.badRequest().body(body);
         } catch (SecurityException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN)
-                    .body(Map.of("message", "forbidden", "data", null));
+            Map<String, Object> body = new HashMap<>();
+            body.put("message", "forbidden");
+            body.put("data", "");
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body(body);
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("message", "internal_server_error", "data", null));
+            Map<String, Object> body = new HashMap<>();
+            body.put("message", "internal_server_error");
+            body.put("data", "");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(body);
         }
     }
 }
